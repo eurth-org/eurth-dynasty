@@ -1,0 +1,100 @@
+---
+// The tree, and under it what search engines and newcomers both want: what it is, how to use
+// it, and answers to the usual questions (also given to search engines as structured data).
+import { faqPage, webApplication } from '@eurth/style/build';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import Maker from '../tool/Maker.svelte';
+
+const faq = [
+  { q: 'Is Dynasty free?', a: 'Yes. There is no account, no watermark and no paid tier. It is made by the Eurth worldbuilding community for anyone who needs it.' },
+  {
+    q: 'Where is my family tree saved?',
+    a: 'In its link, if it is small: the link holds the whole tree, so copying the link is saving it. Any tree, large or small, also saves as a nation profile file, and that file brings it back for editing. Nothing is kept in your browser or on a server.',
+  },
+  {
+    q: 'Which succession laws does it know?',
+    a: 'Absolute primogeniture, male-preference primogeniture, agnatic primogeniture (the male line only), agnatic seniority and elective monarchy, where you rank the candidates yourself. House rules on illegitimacy, renunciation, marrying out and adoption can each be switched on or off.',
+  },
+  {
+    q: 'Can I open the tree in a genealogy program?',
+    a: 'Yes. Dynasty saves and loads GEDCOM, the file format genealogy programs share. Titles, dates, marriages and adoptions travel as standard; the succession law and who reigns are kept in tags that other programs skip.',
+  },
+  { q: 'Can I put it on a wiki?', a: 'Yes. Copy wikitext gives a table of the house and a numbered line of succession to paste into an IIWiki page, and the picture downloads as SVG, PNG or WebP.' },
+  { q: 'Does it work offline, and on a phone?', a: 'Yes to both. After the first visit the site keeps a copy of itself on your device and opens without a connection.' },
+];
+---
+
+<Page
+  site={site}
+  jsonld={[
+    webApplication(site, {
+      featureList: [
+        'Family trees drawn automatically',
+        'Five succession laws',
+        'Line of succession worked out live',
+        'What-if events: death, abdication, renunciation, marrying out',
+        'Link that holds the tree',
+        'Nation profile file',
+        'GEDCOM import and export',
+        'SVG, PNG and WebP downloads',
+        'Wikitext export',
+      ],
+    }),
+    faqPage(faq),
+  ]}
+>
+  <div class="eu-stack">
+    <header class="eu-stack intro">
+      <p class="eu-kicker">Family tree and succession</p>
+      <h1>Who gets the crown?</h1>
+      <p class="eu-lead">Draw a royal or noble house, pick its succession law, and see who inherits. Then kill off the king and see who inherits now. Free, in your browser, no account needed.</p>
+    </header>
+
+    <!-- client:load draws the tool as real HTML first, then wakes it up. -->
+    <Maker client:load siteName={site.name} siteUrl={site.url} />
+
+    <section class="eu-prose">
+      <h2>How it works</h2>
+      <ol>
+        <li>Start from the house on the page, one of the <a href="/examples/">examples</a>, or a clean slate. Pick a person to edit them; add their children and spouses from there.</li>
+        <li>Choose the succession law and the house rules. The line of succession redraws itself as you go, with the heir marked by a word and a ring.</li>
+        <li>Ask “what if”: pick a person and an event, and see who would reign and how the line would change. Make it happen if you like the answer.</li>
+        <li>Copy the link, save the profile file, or take the tree away as a picture, as wikitext or as a GEDCOM file.</li>
+      </ol>
+      <p>
+        New to succession? The <a href="/guide/">guide</a> explains the five laws with worked examples, regencies and pretenders included, and the
+        <a href="/glossary/">glossary</a> has the words.
+      </p>
+
+      <h2>Questions</h2>
+      <dl>
+        {
+          faq.map((item) => (
+            <>
+              <dt>{item.q}</dt>
+              <dd>{item.a}</dd>
+            </>
+          ))
+        }
+      </dl>
+    </section>
+  </div>
+
+  <Fragment slot="inspirations">Dynasty takes after the pedigree rolls of the heralds and the Almanach de Gotha, and its sibling tools Flagwright and Governmint.</Fragment>
+</Page>
+
+<style>
+  .intro {
+    gap: var(--space-2);
+  }
+
+  dt {
+    margin-top: var(--space-4);
+    font: var(--type-heading);
+  }
+
+  dd {
+    margin: var(--space-1) 0 0;
+  }
+</style>

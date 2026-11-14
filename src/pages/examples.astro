@@ -1,56 +1,62 @@
 ---
-// Examples: ready-made houses, each a link into the tree. The links and the pictures are made
-// at build time with the same code the tool uses, so they can never drift apart.
+// Examples: six invented houses, each a link into the tool. The links are made at build time
+// with the same code the tool uses, so they can never drift apart.
 import Page from '@eurth/style/components/Page.astro';
 import { site } from '../../eurth.config.mjs';
-import { describeTree } from '../dynasty/describe';
+import TreeFigure from '../components/TreeFigure.astro';
+import { withThe } from '../dynasty/describe';
 import { examples } from '../dynasty/examples';
 import { encodeTree, LINK_PARAM } from '../dynasty/link';
-import { lawNames } from '../dynasty/model';
-import { drawingLayout, HEADING_HEIGHT, treeSvg } from '../dynasty/render';
-import { paletteFor } from '../ui/palette';
+import { displayName, indexTree, lawNames } from '../dynasty/model';
+import { lineOfSuccession } from '../dynasty/succession';
 
-const palette = paletteFor('dark');
-const cards = examples.map((example) => {
-  const layout = drawingLayout(example.tree);
+const shown = examples.map((example) => {
+  const index = indexTree(example.tree);
+  const succession = lineOfSuccession(example.tree);
+  const name = (id: string | undefined) => displayName(id === undefined ? undefined : index.person.get(id));
   return {
     ...example,
     href: `/?${LINK_PARAM}=${encodeTree(example.tree)}`,
-    picture: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(treeSvg(example.tree, { palette, layout }))}`,
-    width: layout.width,
-    height: layout.height + HEADING_HEIGHT,
-    alt: describeTree(example.tree),
+    reigning: name(succession.reigning),
+    heir: name(succession.heir),
+    people: example.tree.people.length,
   };
 });
 ---
 
 <Page
   site={site}
-  title="Example royal family trees"
-  description="Six fictional royal and noble houses to start from, one for each succession law and one with every exclusion. Open one in the tree and make it yours."
+  title="Example family trees and successions"
+  description="Six invented royal and noble houses to open and change: a daughter who inherits, a duke with only daughters, brothers before sons, an elected king and more."
   crumbs={[{ name: 'Examples', path: '/examples/' }]}
 >
   <div class="eu-stack">
     <header class="eu-prose">
       <p class="eu-kicker">Examples</p>
-      <h1>Example royal family trees</h1>
+      <h1>Example family trees and successions</h1>
       <p class="eu-lead">
-        Six invented houses, one for each succession law and one where every house rule bites. Open one in the <a href="/">tree</a> and change what you like; the
-        <a href="/guide/">guide</a> explains why each line runs the way it does.
+        Six invented houses, one for each way a crown can pass. Open one in the <a href="/">tree</a> and change what you like: marry someone off, switch the
+        law, see who is left standing. The <a href="/guide/">guide</a> explains the laws and the <a href="/glossary/">glossary</a> the words.
       </p>
     </header>
-    <ul class="gallery">
+    <ul class="houses">
       {
-        cards.map((card) => (
-          <li>
-            <a class="eu-card" href={card.href}>
-              <img src={card.picture} alt={card.alt} width={card.width} height={card.height} loading="lazy" />
-              <h2>{card.tree.house}</h2>
-              <p class="eu-muted">
-                {[card.tree.realm, lawNames[card.tree.law]].filter(Boolean).join(' · ')}
-              </p>
-              <p>{card.blurb}</p>
-            </a>
+        shown.map((example) => (
+          <li class="eu-card">
+            <h2>
+              {example.tree.house}
+              <span class="eu-muted">{example.tree.realm}</span>
+            </h2>
+            <p>{example.blurb}</p>
+            <TreeFigure tree={example.tree} id={`example-${example.id}`} label={`Family tree of ${withThe(example.tree.house)}`}>
+              {lawNames[example.tree.law]}. {example.reigning} reigns; {example.tree.law === 'elective' ? 'the first choice' : 'the heir'} is {example.heir}.{' '}
+              {example.people} people.
+            </TreeFigure>
+            <p>
+              <a class="eu-btn" href={example.href}>
+                Open the {example.tree.house} in the tree
+              </a>
+            </p>
           </li>
         ))
       }
@@ -59,23 +65,24 @@ const cards = examples.map((example) => {
 </Page>
 
 <style>
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-    gap: var(--space-4);
+  .houses {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .gallery img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-md);
+  h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-3);
+    font: var(--type-subtitle);
   }
 
-  .gallery h2 {
-    font: var(--type-heading);
+  h2 span {
+    font: var(--type-body);
   }
 </style>

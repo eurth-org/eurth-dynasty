@@ -13,15 +13,14 @@ Done in Phase 2 so far:
 - The starter's configuration, renamed for Dynasty: `eurth.config.mjs`, `astro.config.mjs`, `wrangler.jsonc`, `LAUNCH_AT` (15 December), the three workflows, `tests/shell.test.js`, placeholder icons in `public/`.
 - `src/dynasty/edit.ts`: every change the tool can make to a tree, tested.
 - The drawing can carry class names instead of colours, for trees inside pages (`src/components/TreeFigure.astro`).
-- Pages: examples, glossary and 404.
-- Tool components: `src/tool/TreeView.svelte` (the tree you can click and move through) and `src/tool/PersonEditor.svelte`. Neither has been built or run yet.
+- The tool: `src/tool/Maker.svelte` with `TreeView.svelte`, `PersonEditor.svelte` and `palette.ts`.
+- Pages: the tree (start page), examples, glossary and 404. The site builds, and the suite's checks pass on it.
 
 Next, in order:
 
-1. `src/tool/Maker.svelte`: the controls (house, law, rules, who reigns), What if, the line of succession, the toolbar, exports and sharing, the profile buttons, undo. Then `src/pages/index.astro` around it. Until that page exists the site doesn't build, so CI is red.
-2. `src/pages/guide.astro`: the prose, with the worked examples from `src/content/worked.ts`.
-3. `npm run check && npm run build && npm test && npm run axe` until all four pass. Astro needs Node 22.23 or later; on this machine that is `/opt/homebrew/bin/node` (26).
-4. `npm run images` for the icons and the sharing image; README; `docs/feedback-log.md`.
+1. `src/pages/guide.astro`: the prose, with the worked examples from `src/content/worked.ts`.
+2. `npm run axe`, and try every part of the tool in a browser (`npm run preview`). Astro needs Node 22.23 or later; on this machine that is `/opt/homebrew/bin/node` (26).
+3. `npm run images` for the icons and the sharing image; README; `docs/feedback-log.md`.
 
 Waiting on others:
 
