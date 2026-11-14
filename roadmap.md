@@ -6,7 +6,7 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Where to pick up
 
-**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 to 6 and 11 (model, succession engine, What if, layout and SVG drawing, description, the link and the profile section, and the checks with the own-grandparent easter egg). Next: step 7, GEDCOM.
+**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 to 8 and 11 (model, succession engine, What if, layout and SVG drawing, description, the link and the profile section, GEDCOM in and out, the plain wiki export, and the checks with the own-grandparent easter egg). Next: step 10, the guide and glossary (step 9, the example houses, is done too).
 
 Waiting on others:
 

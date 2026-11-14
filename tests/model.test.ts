@@ -22,7 +22,7 @@ describe('text', () => {
   it('keeps plain text and drops markup and control characters', () => {
     expect(cleanText('  King   Teomir II ', 80)).toBe('King Teomir II');
     expect(cleanText('<script>alert(1)</script>', 80)).toBe('script alert(1) /script');
-    expect(cleanText('a\u0000b\nc d', 80)).toBe('a b c d');
+    expect(cleanText('a\u0000b\nc\u2028d', 80)).toBe('a b c d');
     expect(cleanText('abcdef', 3)).toBe('abc');
     expect(cleanText(42, 80)).toBe('');
   });
