@@ -335,12 +335,19 @@ describe('the drawing', () => {
 
   it('marks the heir with a word and a ring, and the reigning person with a word and a crown', () => {
     const svg = treeSvg(varenko());
-    expect(svg).toContain('>HEIR</text>');
-    expect(svg).toContain('>REIGNING SINCE 1988</text>');
+    expect(svg).toContain('>Heir</text>');
+    expect(svg).toContain('>Reigning since 1988</text>');
     expect((svg.match(/stroke-width="3"/g) ?? []).length).toBe(1);
     expect((svg.match(/d="M1 11L2 3/g) ?? []).length).toBe(1);
     expect(svg).toContain('House of Varenko');
     expect(svg).toContain('Kingdom of Ostaril · Absolute primogeniture');
+  });
+
+  it('sets no text smaller than 13px, as the handbook asks', () => {
+    for (const example of examples) {
+      const sizes = [...treeSvg(example.tree).matchAll(/font-size="(\d+)"/g)].map((m) => Number(m[1]));
+      expect(Math.min(...sizes), example.id).toBeGreaterThanOrEqual(13);
+    }
   });
 
   it('uses only the colours it was given', () => {

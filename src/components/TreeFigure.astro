@@ -1,0 +1,64 @@
+---
+// A family tree drawn into the page: the same drawing the tool downloads, but with class names
+// in place of colours, so it takes the page's tokens and follows the theme. The drawing says
+// what it shows in its own title and description; the caption is for everyone.
+import type { Tree } from '../dynasty/model';
+import { treeSvg } from '../dynasty/render';
+
+interface Props {
+  tree: Tree;
+  /** Unique on the page: it names the drawing's title and description. */
+  id: string;
+  /** What to call the scrolling area, for screen readers: "Family tree of the House of Varenko". */
+  label: string;
+  heading?: boolean;
+}
+
+const { tree, id, label, heading = false } = Astro.props;
+const svg = treeSvg(tree, { classes: true, idPrefix: id, heading });
+---
+
+<figure class="tree-figure">
+  <!-- Wide trees scroll sideways; the area takes the keyboard so that it can be scrolled without a mouse. -->
+  <div class="eu-scroll tree-scroll" tabindex="0" role="group" aria-label={label}>
+    <Fragment set:html={svg} />
+  </div>
+  <figcaption class="eu-help"><slot /></figcaption>
+</figure>
+
+<style is:global>
+  .tree-figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: var(--space-4) 0;
+    max-width: none;
+  }
+
+  .tree-scroll {
+    padding: var(--space-2);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+
+  .tree-scroll > svg {
+    display: block;
+  }
+
+  /* The drawing's colours: one class for each token it uses. */
+  .dy-f-surface { fill: var(--surface); }
+  .dy-f-surface-raised { fill: var(--surface-raised); }
+  .dy-f-ink { fill: var(--ink); }
+  .dy-f-ink-muted { fill: var(--ink-muted); }
+  .dy-f-line-strong { fill: var(--line-strong); }
+  .dy-f-accent-text { fill: var(--accent-text); }
+  .dy-f-crown { fill: var(--caution-text); }
+  .dy-s-surface { stroke: var(--surface); }
+  .dy-s-surface-raised { stroke: var(--surface-raised); }
+  .dy-s-ink { stroke: var(--ink); }
+  .dy-s-ink-muted { stroke: var(--ink-muted); }
+  .dy-s-line-strong { stroke: var(--line-strong); }
+  .dy-s-accent-text { stroke: var(--accent-text); }
+  .dy-s-crown { stroke: var(--caution-text); }
+</style>

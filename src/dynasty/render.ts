@@ -18,13 +18,13 @@ export interface Palette {
   inkMuted: string;
   lineStrong: string;
   accentText: string;
-  /** The crown beside "Reigning". Decoration: the word carries the meaning. */
+  /** The crown beside "Reigning": the caution-text token, which is amber and reads in both themes. */
   crown: string;
 }
 
 /** @eurth/style's values at the time of writing, for use where the tokens can't be reached. */
 export const palettes: Record<'dark' | 'light', Palette> = {
-  dark: { surface: '#002b36', surfaceRaised: '#0d353f', ink: '#fcf6e1', inkMuted: '#bac1b5', lineStrong: '#798c88', accentText: '#80c8e5', crown: '#f7941d' },
+  dark: { surface: '#002b36', surfaceRaised: '#0d353f', ink: '#fcf6e1', inkMuted: '#bac1b5', lineStrong: '#798c88', accentText: '#80c8e5', crown: '#ffc673' },
   light: { surface: '#ffffff', surfaceRaised: '#f8f8f8', ink: '#222222', inkMuted: '#545454', lineStrong: '#646464', accentText: '#12577b', crown: '#7a4100' },
 };
 
@@ -174,12 +174,12 @@ function cardSvg(card: Card, text: CardText, paint: Paint): string {
     tagX = 34;
   }
   if (text.tag) {
-    inner.push(`<text x="${tagX}" y="20" font-family="${SANS}" font-size="11" font-weight="700" letter-spacing="0.66"${paint({ fill: text.reigning || text.place !== undefined ? 'accentText' : 'inkMuted' })}>${escapeXml(text.tag.toUpperCase())}</text>`);
+    inner.push(`<text x="${tagX}" y="20" font-family="${SANS}" font-size="13" font-weight="700"${paint({ fill: text.reigning || text.place !== undefined ? 'accentText' : 'inkMuted' })}>${escapeXml(text.tag)}</text>`);
   }
   text.name.forEach((line, i) => {
-    inner.push(`<text x="12" y="${41 + i * 18}" font-family="${SANS}" font-size="15"${paint({ fill: 'ink' })}>${escapeXml(line)}</text>`);
+    inner.push(`<text x="12" y="${42 + i * 18}" font-family="${SANS}" font-size="15"${paint({ fill: 'ink' })}>${escapeXml(line)}</text>`);
   });
-  if (text.dates) inner.push(`<text x="12" y="${h - 11}" font-family="${MONO}" font-size="12"${paint({ fill: 'inkMuted' })}>${escapeXml(text.dates)}</text>`);
+  if (text.dates) inner.push(`<text x="12" y="${h - 11}" font-family="${MONO}" font-size="13"${paint({ fill: 'inkMuted' })}>${escapeXml(text.dates)}</text>`);
   // A nested svg clips its contents, so an unusually wide name can't spill out of its card.
   parts.push(`<svg x="${x}" y="${y}" width="${w}" height="${h}">${inner.join('')}</svg>`);
   return `<g>${parts.join('')}</g>`;

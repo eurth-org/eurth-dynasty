@@ -1,0 +1,59 @@
+---
+// The glossary: each term has an id to link to, and the whole set is given to search engines
+// as a DefinedTermSet. The words live in src/content/glossary.ts.
+import { definedTermSet } from '@eurth/style/build';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import { glossary, termById } from '../content/glossary';
+
+const title = 'Glossary of succession and family tree terms';
+const terms = [...glossary].sort((a, b) => a.term.localeCompare(b.term, 'en'));
+---
+
+<Page
+  site={site}
+  title={title}
+  description={`${terms.length} words of succession and genealogy, a sentence or two each: agnate, cadet branch, heir presumptive, morganatic marriage, pretender, regent, Salic law and more.`}
+  crumbs={[{ name: 'Glossary', path: '/glossary/' }]}
+  jsonld={[definedTermSet(site, { name: title, path: '/glossary/', terms })]}
+>
+  <article class="eu-prose">
+    <p class="eu-kicker">Glossary</p>
+    <h1>{title}</h1>
+    <p class="eu-lead">
+      The words of crowns and family trees, a sentence or two each. The <a href="/guide/">guide</a> shows how they fit together, with a family worked through
+      every law; the <a href="/">tree</a> lets you try them on a house of your own.
+    </p>
+    <dl>
+      {
+        terms.map((t) => (
+          <>
+            <dt id={t.id}>{t.term}</dt>
+            <dd>
+              {t.definition}
+              {t.see?.length ? (
+                <>
+                  {' '}
+                  See also{' '}
+                  {t.see.map((id, i) => (
+                    <>
+                      {i > 0 && (i === t.see!.length - 1 ? ' and ' : ', ')}
+                      <a href={`#${id}`}>{termById(id)?.term.toLowerCase() ?? id}</a>
+                    </>
+                  ))}
+                  .
+                </>
+              ) : null}
+            </dd>
+          </>
+        ))
+      }
+    </dl>
+  </article>
+</Page>
+
+<style>
+  dt {
+    scroll-margin-top: var(--space-8);
+  }
+</style>
