@@ -6,7 +6,7 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Where to pick up
 
-**14 November 2026.** The brief is saved, the repository exists, and this plan is written. Nothing is built. The plan is waiting for Stijn's go-ahead; the next step is Phase 1, step 1.
+**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 and 2 (the model and the succession engine, with the example houses they are tested on). Next: step 3, What if.
 
 Waiting on others:
 

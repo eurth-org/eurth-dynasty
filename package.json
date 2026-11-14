@@ -1,0 +1,19 @@
+{
+  "name": "eurth-dynasty",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Dynasty: family trees with succession rules for fictional royal and noble houses, by Eurth.",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}
