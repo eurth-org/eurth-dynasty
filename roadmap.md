@@ -6,13 +6,12 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Where to pick up
 
-**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 to 8 and 11 (model, succession engine, What if, layout and SVG drawing, description, the link and the profile section, GEDCOM in and out, the plain wiki export, and the checks with the own-grandparent easter egg). Next: step 10, the guide and glossary (step 9, the example houses, is done too).
+**14 November 2026.** Phase 1 is done: the engine in `src/dynasty/`, the worked examples and glossary in `src/content/`, 168 tests. @eurth/style 1.0.0 and @eurth/profile 1.0.0 are both released, so Phase 2 has begun. Next: step 12, the site from the starter template. The guide's prose is written straight into its page (step 13), drawing its examples from `src/content/worked.ts`.
 
 Waiting on others:
 
-- **@eurth/style 1.0.0** is not released (no HANDBOOK.md, starter template or tag on GitHub yet). Phase 2 can't start until it is: check `gh release list -R eurth-org/eurth-style`.
-- **@eurth/profile 1.0.0** is not released. Its draft `dynasty` section holds only summary text (house, law, monarch, heir, succession as names). It allows extra keys, so Dynasty will keep the tree itself there too (see Phase 1, step 6). Ask Foundations to document those keys.
-- **IIWiki's family tree templates:** Stijn to say which exist (Family tree, Tree chart, Ahnentafel). Until then the wiki export is the fallback only.
+- **The profile schema** describes `dynasty` as names only (house, law, monarch, heir, succession), and the handbook asks sections to stay small. The brief asks for the whole tree in the file, so Dynasty keeps it under keys of its own in its section (`people`, `relations`, `rules`, `reigning` and a few more), which the schema allows. To propose to @eurth/profile, so the schema describes them.
+- **IIWiki's family tree templates:** Stijn to say which exist (Family tree, Tree chart, Ahnentafel). Until then the wiki export is the plain one: a table and a numbered line.
 
 ## Next
 
