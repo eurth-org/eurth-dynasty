@@ -4,13 +4,14 @@
  *
  *   https://dynasty.eurth.org/?d=1.WyJIb3VzZSBvZiBWYXJlbmtvIiwi…
  *
- * The form is the one @eurth/style gives every tool ("<version>.<compact JSON, base64url>"), so
- * the site can use the shared helpers on it. Only small trees fit: past MAX_STATE the tool says
- * so and offers the profile file instead.
+ * The form is the one @eurth/style gives every tool ("<version>.<compact JSON, base64url>"),
+ * written and read with its helpers. Only small trees fit: past MAX_STATE the tool says so and
+ * offers the profile file instead.
  *
  * What arrives in a link is someone else's input. decodeTree never throws, and everything it
  * reads goes through cleanTree before it is used.
  */
+import { decodeState, encodeState } from '@eurth/style';
 import { cleanTree, laws, type Tree } from './model';
 
 export const LINK_VERSION = 1;
@@ -118,29 +119,15 @@ export function unpackTree(value: unknown): Tree | null {
   });
 }
 
-const toBase64Url = (bytes: Uint8Array): string => {
-  let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-};
-
-const fromBase64Url = (text: string): Uint8Array => Uint8Array.from(atob(text.replace(/-/g, '+').replace(/_/g, '/')), (c) => c.charCodeAt(0));
-
 /** The tree as the value of the link's query parameter. */
 export function encodeTree(tree: Tree): string {
-  return `${LINK_VERSION}.${toBase64Url(new TextEncoder().encode(JSON.stringify(packTree(tree))))}`;
+  return encodeState(packTree(tree), LINK_VERSION);
 }
 
 /** Reads a tree back. Null for anything that isn't one: too long, malformed, a version from the future. */
 export function decodeTree(text: string | null | undefined): Tree | null {
-  if (typeof text !== 'string' || text.length > MAX_STATE * 2) return null;
-  const found = /^(\d{1,4})\.([A-Za-z0-9_-]*)$/.exec(text);
-  if (!found || Number(found[1]) !== LINK_VERSION) return null;
-  try {
-    return unpackTree(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(fromBase64Url(found[2]!))));
-  } catch {
-    return null;
-  }
+  const state = decodeState(text, { maxLength: MAX_STATE * 2 });
+  return state && state.version === LINK_VERSION ? unpackTree(state.value) : null;
 }
 
 /** Whether the tree is small enough to travel in a link. */

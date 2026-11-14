@@ -1,16 +1,9 @@
 {
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "src/**/*", "tools/**/*", "tests/**/*", "*.mjs"],
+  "exclude": ["dist"],
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2023", "DOM"],
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "verbatimModuleSyntax": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "noEmit": true
-  },
-  "include": ["src/**/*", "tests/**/*", "tools/**/*"]
+    "noUncheckedIndexedAccess": true
+  }
 }

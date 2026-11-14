@@ -3,7 +3,7 @@ import { describeLine, describeTree, lifeText, ordinal, realmWithThe, rulesText,
 import { examples, halvard, lesnia, makeTree, person, union, varenko } from '../src/dynasty/examples';
 import { CARD_HEIGHT, CARD_WIDTH, layoutTree, neighbours, readingOrder, SPOUSE_GAP, type Layout } from '../src/dynasty/layout';
 import { cleanTree, indexTree, type Tree } from '../src/dynasty/model';
-import { cardText, drawingLayout, escapeXml, needsTallCards, palettes, TALL_CARD_HEIGHT, treeSvg, wrapName } from '../src/dynasty/render';
+import { cardText, drawingLayout, escapeXml, needsTallCards, paintClasses, palettes, TALL_CARD_HEIGHT, treeSvg, wrapName } from '../src/dynasty/render';
 import { lineOfSuccession } from '../src/dynasty/succession';
 
 const card = (layout: Layout, id: string) => layout.cards.find((c) => c.id === id)!;
@@ -347,6 +347,19 @@ describe('the drawing', () => {
     const palette = { surface: '#010101', surfaceRaised: '#020202', ink: '#030303', inkMuted: '#040404', lineStrong: '#050505', accentText: '#060606', crown: '#070707' };
     const colours = new Set(treeSvg(varenko(), { palette }).match(/#[0-9a-f]{6}\b/gi));
     expect([...colours].sort()).toEqual(Object.values(palette).sort());
+  });
+
+  it('can carry class names instead of colours, for a drawing inside a page', () => {
+    const svg = treeSvg(varenko(), { classes: true, idPrefix: 'worked-absolute', heading: false });
+    expect(svg).not.toMatch(/#[0-9a-f]{6}\b/i);
+    expect(svg).toContain('aria-labelledby="worked-absolute-title worked-absolute-desc"');
+    expect(svg).toContain('class="dy-f-surface-raised dy-s-line-strong"');
+    expect(svg).toContain('class="dy-s-accent-text"');
+    expect(svg).toContain('class="dy-f-crown"');
+    const used = new Set([...svg.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1]!.split(' ')));
+    const known = new Set(paintClasses.map((c) => c.name));
+    for (const name of used) expect(known.has(name), name).toBe(true);
+    expect(paintClasses).toHaveLength(14);
   });
 
   it('escapes whatever was typed', () => {

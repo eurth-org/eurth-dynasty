@@ -128,7 +128,7 @@ export function lineOfSuccession(tree: Tree): Succession {
   const founder = tree.founder !== undefined && index.person.has(tree.founder) ? tree.founder : defaultFounder(tree, index);
   const base = { law: tree.law, ...(founder === undefined ? {} : { founder }), ...(reigning === undefined ? {} : { reigning }) };
 
-  if (tree.law === 'elective') return { ...base, ...elective(tree, index, reigning) };
+  if (tree.law === 'elective') return { ...base, ...elective(tree, reigning) };
   if (founder === undefined) return { ...base, line: [], excluded: [], candidates: [] };
 
   const ex = tree.exclude;
@@ -209,7 +209,7 @@ export function lineOfSuccession(tree: Tree): Succession {
 }
 
 /** Under an elective law nobody inherits: the line is the user's own picks, in their order. */
-function elective(tree: Tree, index: TreeIndex, reigning: string | undefined): Pick<Succession, 'line' | 'excluded' | 'candidates' | 'heir'> {
+function elective(tree: Tree, reigning: string | undefined): Pick<Succession, 'line' | 'excluded' | 'candidates' | 'heir'> {
   const eligible = (p: Person): boolean =>
     !isDead(p) && p.id !== reigning && !p.abdicated && !(tree.exclude.renounced && p.renounced !== undefined);
   const candidates = tree.people.filter(eligible).map((p) => p.id);

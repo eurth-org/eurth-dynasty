@@ -28,6 +28,24 @@ export const palettes: Record<'dark' | 'light', Palette> = {
   light: { surface: '#ffffff', surfaceRaised: '#f8f8f8', ink: '#222222', inkMuted: '#545454', lineStrong: '#646464', accentText: '#12577b', crown: '#7a4100' },
 };
 
+type Role = keyof Palette;
+const kebab = (role: Role): string => role.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
+/**
+ * How a shape gets its colours. A downloaded picture carries them as plain values; a drawing
+ * inside a page carries class names instead (dy-f-ink, dy-s-line-strong, …), so the page's
+ * stylesheet can give it the tokens and it follows the theme.
+ */
+type Paint = (colours: { fill?: Role; stroke?: Role }) => string;
+const paintWith = (palette: Palette): Paint => ({ fill, stroke }) => `${fill ? ` fill="${palette[fill]}"` : ''}${stroke ? ` stroke="${palette[stroke]}"` : ''}`;
+const paintWithClasses: Paint = ({ fill, stroke }) => ` class="${[fill ? `dy-f-${kebab(fill)}` : '', stroke ? `dy-s-${kebab(stroke)}` : ''].filter(Boolean).join(' ')}"`;
+
+/** The class names a drawing inside a page uses, with the role each stands for. */
+export const paintClasses: { name: string; property: 'fill' | 'stroke'; role: Role }[] = (['surface', 'surfaceRaised', 'ink', 'inkMuted', 'lineStrong', 'accentText', 'crown'] as Role[]).flatMap((role) => [
+  { name: `dy-f-${kebab(role)}`, property: 'fill' as const, role },
+  { name: `dy-s-${kebab(role)}`, property: 'stroke' as const, role },
+]);
+
 export const SANS = 'system-ui, Arial, sans-serif';
 export const MONO = 'ui-monospace, Menlo, monospace';
 
@@ -130,7 +148,12 @@ export const drawingLayout = (tree: Tree): Layout => layoutTree(tree, { cardWidt
 export const linkPath = (points: readonly (readonly [number, number])[]): string => points.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join('');
 
 export interface RenderOptions {
+  /** The colours of a picture that stands on its own. Night's, when neither this nor `classes` is given. */
   palette?: Palette;
+  /** For a drawing inside a page: class names instead of colours (see paintClasses), and no ground. */
+  classes?: boolean;
+  /** Put before the ids of the title and description, when a page holds more than one drawing. */
+  idPrefix?: string;
   /** The house's name, realm and law above the tree. On by default. */
   heading?: boolean;
   /** A layout made earlier (see drawingLayout), to avoid working it out twice. */
@@ -138,25 +161,25 @@ export interface RenderOptions {
   succession?: Succession;
 }
 
-function cardSvg(card: Card, text: CardText, palette: Palette): string {
+function cardSvg(card: Card, text: CardText, paint: Paint): string {
   const { x, y, width: w, height: h } = card;
   const parts: string[] = [];
   // The ring: a second outline, clear of the card, so it reads without colour.
-  if (text.heir) parts.push(`<rect x="${x - 5}" y="${y - 5}" width="${w + 10}" height="${h + 10}" rx="16" fill="none" stroke="${palette.accentText}" stroke-width="3"/>`);
-  parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${palette.surfaceRaised}" stroke="${palette.lineStrong}" stroke-width="1.5"/>`);
+  if (text.heir) parts.push(`<rect x="${x - 5}" y="${y - 5}" width="${w + 10}" height="${h + 10}" rx="16" fill="none" stroke-width="3"${paint({ stroke: 'accentText' })}/>`);
+  parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" stroke-width="1.5"${paint({ fill: 'surfaceRaised', stroke: 'lineStrong' })}/>`);
   const inner: string[] = [];
   let tagX = 12;
   if (text.reigning) {
-    inner.push(`<path transform="translate(12 9)" d="${CROWN_PATH}" fill="${palette.crown}"/>`);
+    inner.push(`<path transform="translate(12 9)" d="${CROWN_PATH}"${paint({ fill: 'crown' })}/>`);
     tagX = 34;
   }
   if (text.tag) {
-    inner.push(`<text x="${tagX}" y="20" font-family="${SANS}" font-size="11" font-weight="700" letter-spacing="0.66" fill="${text.reigning || text.place !== undefined ? palette.accentText : palette.inkMuted}">${escapeXml(text.tag.toUpperCase())}</text>`);
+    inner.push(`<text x="${tagX}" y="20" font-family="${SANS}" font-size="11" font-weight="700" letter-spacing="0.66"${paint({ fill: text.reigning || text.place !== undefined ? 'accentText' : 'inkMuted' })}>${escapeXml(text.tag.toUpperCase())}</text>`);
   }
   text.name.forEach((line, i) => {
-    inner.push(`<text x="12" y="${41 + i * 18}" font-family="${SANS}" font-size="15" fill="${palette.ink}">${escapeXml(line)}</text>`);
+    inner.push(`<text x="12" y="${41 + i * 18}" font-family="${SANS}" font-size="15"${paint({ fill: 'ink' })}>${escapeXml(line)}</text>`);
   });
-  if (text.dates) inner.push(`<text x="12" y="${h - 11}" font-family="${MONO}" font-size="12" fill="${palette.inkMuted}">${escapeXml(text.dates)}</text>`);
+  if (text.dates) inner.push(`<text x="12" y="${h - 11}" font-family="${MONO}" font-size="12"${paint({ fill: 'inkMuted' })}>${escapeXml(text.dates)}</text>`);
   // A nested svg clips its contents, so an unusually wide name can't spill out of its card.
   parts.push(`<svg x="${x}" y="${y}" width="${w}" height="${h}">${inner.join('')}</svg>`);
   return `<g>${parts.join('')}</g>`;
@@ -167,7 +190,8 @@ function cardSvg(card: Card, text: CardText, palette: Palette): string {
  * @param tree a clean tree (see cleanTree)
  */
 export function treeSvg(tree: Tree, options: RenderOptions = {}): string {
-  const palette = options.palette ?? palettes.dark;
+  const paint = options.classes ? paintWithClasses : paintWith(options.palette ?? palettes.dark);
+  const ids = options.idPrefix ?? 'dynasty';
   const index: TreeIndex = indexTree(tree);
   const succession = options.succession ?? lineOfSuccession(tree);
   const layout = options.layout ?? drawingLayout(tree);
@@ -178,24 +202,24 @@ export function treeSvg(tree: Tree, options: RenderOptions = {}): string {
   const title = tree.house ? `Family tree of ${/^(house|clan|dynasty|line|family|kindred)\b/i.test(tree.house) ? 'the ' : ''}${tree.house}` : 'Family tree';
 
   const out: string[] = [];
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-labelledby="dynasty-title dynasty-desc">`);
-  out.push(`<title id="dynasty-title">${escapeXml(title)}</title>`);
-  out.push(`<desc id="dynasty-desc">${escapeXml(describeTree(tree, succession, index))}</desc>`);
-  out.push(`<rect width="${width}" height="${height}" fill="${palette.surface}"/>`);
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" aria-labelledby="${ids}-title ${ids}-desc">`);
+  out.push(`<title id="${ids}-title">${escapeXml(title)}</title>`);
+  out.push(`<desc id="${ids}-desc">${escapeXml(describeTree(tree, succession, index))}</desc>`);
+  if (!options.classes) out.push(`<rect width="${width}" height="${height}"${paint({ fill: 'surface' })}/>`);
   if (heading) {
-    out.push(`<text x="24" y="44" font-family="${SANS}" font-size="28" font-weight="700" fill="${palette.ink}">${escapeXml(tree.house || 'Family tree')}</text>`);
-    out.push(`<text x="24" y="68" font-family="${SANS}" font-size="14" fill="${palette.inkMuted}">${escapeXml([tree.realm, lawNames[tree.law]].filter(Boolean).join(' · '))}</text>`);
+    out.push(`<text x="24" y="44" font-family="${SANS}" font-size="28" font-weight="700"${paint({ fill: 'ink' })}>${escapeXml(tree.house || 'Family tree')}</text>`);
+    out.push(`<text x="24" y="68" font-family="${SANS}" font-size="14"${paint({ fill: 'inkMuted' })}>${escapeXml([tree.realm, lawNames[tree.law]].filter(Boolean).join(' · '))}</text>`);
   }
   out.push(`<g transform="translate(0 ${top})">`);
   if (!layout.cards.length) {
-    out.push(`<text x="24" y="40" font-family="${SANS}" font-size="15" fill="${palette.inkMuted}">Nobody here yet.</text>`);
+    out.push(`<text x="24" y="40" font-family="${SANS}" font-size="15"${paint({ fill: 'inkMuted' })}>Nobody here yet.</text>`);
   }
-  out.push(`<g fill="none" stroke="${palette.lineStrong}" stroke-width="2" stroke-linejoin="round">`);
-  for (const link of layout.links) out.push(`<path d="${linkPath(link.points)}"${link.dashed ? ' stroke-dasharray="6 5"' : ''}/>`);
+  out.push(`<g fill="none" stroke-width="2" stroke-linejoin="round">`);
+  for (const link of layout.links) out.push(`<path d="${linkPath(link.points)}"${link.dashed ? ' stroke-dasharray="6 5"' : ''}${paint({ stroke: 'lineStrong' })}/>`);
   out.push('</g>');
   for (const card of layout.cards) {
     const person = index.person.get(card.id);
-    if (person) out.push(cardSvg(card, cardText(tree, succession, person), palette));
+    if (person) out.push(cardSvg(card, cardText(tree, succession, person), paint));
   }
   out.push('</g></svg>');
   return out.join('');

@@ -1,3 +1,5 @@
+# Check, build and test on every push and pull request; axe and Lighthouse on main; deploy main
+# once the door has opened. All of it lives in @eurth/style, so every tool stays in step.
 name: CI
 
 on:
@@ -5,17 +7,7 @@ on:
     branches: [main]
   pull_request:
 
-# Until the site exists this only checks the engine. Nothing is deployed: Dynasty's door opens on
-# 15 December 2026, and the launch workflow (to come) is the only thing that may put it online.
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run check
-      - run: npm test
+  ci:
+    uses: eurth-org/eurth-style/.github/workflows/tool-ci.yml@v1
+    secrets: inherit
