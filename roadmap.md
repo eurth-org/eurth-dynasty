@@ -6,7 +6,7 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Where to pick up
 
-**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1, 2, 3 and 11 (model, succession engine, What if, and the checks with the own-grandparent easter egg). Next: step 4, layout and drawing.
+**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 to 5 and 11 (model, succession engine, What if, layout and SVG drawing, description, and the checks with the own-grandparent easter egg). Next: step 6, saving (the link and the profile section).
 
 Waiting on others:
 
@@ -57,6 +57,8 @@ Plain TypeScript in `src/dynasty/`, tests in `tests/`, as Flagwright keeps its e
 20. README (use, development, deployment), docs/feedback-log.md, and the handbook's checklist.
 
 ### After launch
+
+- A tighter layout: families are each given their own band, which is safe but wide. Let neighbouring branches tuck under one another.
 
 - Wiki export for IIWiki's own family tree templates, once we know which it has.
 
