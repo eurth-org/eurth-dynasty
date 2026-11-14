@@ -6,7 +6,7 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 ## Where to pick up
 
-**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1 and 2 (the model and the succession engine, with the example houses they are tested on). Next: step 3, What if.
+**14 November 2026.** Phase 1 is under way, with Stijn's go-ahead to carry on without stopping between phases. Done so far: steps 1, 2, 3 and 11 (model, succession engine, What if, and the checks with the own-grandparent easter egg). Next: step 4, layout and drawing.
 
 Waiting on others:
 
