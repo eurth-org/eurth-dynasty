@@ -45,7 +45,7 @@
   import { claimText, lineOfSuccession, reasonText } from '../dynasty/succession';
   import { checkTree, GRANDPARENT_TOAST, ownGrandparents } from '../dynasty/validate';
   import { eventKinds, eventNames, eventPeople, whatIf, type EventKind } from '../dynasty/whatif';
-  import { toWikitext } from '../dynasty/wikitext';
+  import { ahnentafelSubject, toWikitext, wikiFormats, type WikiFormat } from '../dynasty/wikitext';
   import { paletteFor, type Theme } from './palette';
   import PersonEditor from './PersonEditor.svelte';
   import TreeView from './TreeView.svelte';
@@ -68,6 +68,7 @@
   let eventPerson = $state('');
   let eventKind = $state<EventKind>('dies');
   let size = $state('drawn');
+  let wikiFormat = $state<WikiFormat>('tree-chart');
 
   const index = $derived(indexTree(tree));
   const succession = $derived(lineOfSuccession(tree));
@@ -209,8 +210,13 @@
     }
   }
 
+  // An ahnentafel is of one person: the one picked in the tree, or else whoever reigns.
+  const wikiSubject = $derived(ahnentafelSubject(tree, selected));
+  const wikiHint = $derived(wikiFormats.find((format) => format.id === wikiFormat)?.hint ?? '');
+
   async function copyWikitext() {
-    toast((await copyText(toWikitext(tree))) ? 'Wikitext copied. Paste it into the page’s source on IIWiki.' : 'That didn’t copy. Your browser may not allow it here.');
+    const copied = await copyText(toWikitext(tree, { format: wikiFormat, ...(wikiSubject === undefined ? {} : { subject: wikiSubject }) }));
+    toast(copied ? 'Wikitext copied. Paste it into the page’s source on IIWiki.' : 'That didn’t copy. Your browser may not allow it here.');
   }
 
   async function loadGedcom(input: HTMLInputElement) {
@@ -322,8 +328,23 @@
         <button type="button" class="eu-btn" data-click="bounce" onclick={() => gedcomInput?.click()}><Icon icon={faFileImport} /> Load GEDCOM</button>
         <!-- Hidden: the button beside it opens the file picker. -->
         <input bind:this={gedcomInput} hidden type="file" accept=".ged,.gedcom,text/plain" onchange={(e) => loadGedcom(e.currentTarget)} />
+      </div>
+
+      <div class="eu-row">
+        <label class="eu-field size">
+          <span class="eu-label">Wikitext for IIWiki</span>
+          <select class="eu-select" bind:value={wikiFormat} aria-describedby="wiki-help">
+            {#each wikiFormats as format (format.id)}
+              <option value={format.id}>{format.id === 'ahnentafel' && wikiSubject !== undefined ? `Ahnentafel of ${name(wikiSubject)}` : format.name}</option>
+            {/each}
+          </select>
+        </label>
         <button type="button" class="eu-btn" data-click="pop" onclick={copyWikitext}><Icon icon={faCopy} /> Copy wikitext</button>
       </div>
+      <p class="eu-help" id="wiki-help">
+        {wikiHint}
+        {wikiFormat === 'ahnentafel' ? 'Pick someone in the tree to make it theirs.' : 'The line of succession comes with it, as a numbered list.'}
+      </p>
       <p class="eu-help">
         The link holds a small tree whole. The profile file holds any tree, and carries your nation from one Eurth tool to the next. GEDCOM is for genealogy programs. Nothing
         is kept in this browser.

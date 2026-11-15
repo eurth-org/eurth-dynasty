@@ -20,7 +20,10 @@ const faq = [
     q: 'Can I open the tree in a genealogy program?',
     a: 'Yes. Dynasty saves and loads GEDCOM, the file format genealogy programs share. Titles, dates, marriages and adoptions travel as standard; the succession law and who reigns are kept in tags that other programs skip.',
   },
-  { q: 'Can I put it on a wiki?', a: 'Yes. Copy wikitext gives a table of the house and a numbered line of succession to paste into an IIWiki page, and the picture downloads as SVG, PNG or WebP.' },
+  {
+    q: 'Can I put it on a wiki?',
+    a: 'Yes. Copy wikitext writes the tree for IIWiki’s Tree chart or Family tree template, one person’s ancestors for the Ahnentafel template, or a plain table that needs no template, each with the line of succession as a numbered list. The picture downloads as SVG, PNG or WebP.',
+  },
   { q: 'Does it work offline, and on a phone?', a: 'Yes to both. After the first visit the site keeps a copy of itself on your device and opens without a connection.' },
 ];
 ---
@@ -38,7 +41,7 @@ const faq = [
         'Nation profile file',
         'GEDCOM import and export',
         'SVG, PNG and WebP downloads',
-        'Wikitext export',
+        'Wikitext for the Tree chart, Family tree and Ahnentafel templates',
       ],
     }),
     faqPage(faq),

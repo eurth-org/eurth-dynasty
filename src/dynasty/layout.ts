@@ -27,6 +27,21 @@ export interface LayoutOptions {
   cardHeight?: number;
   /** The person whose family is drawn first, on the left. Defaults to the founder of the line. */
   first?: string;
+  /** The space between two partners, between two families, and around the whole tree. */
+  spouseGap?: number;
+  siblingGap?: number;
+  margin?: number;
+  /**
+   * Start the line from one known parent at the middle of their card. The picture starts it
+   * off-centre, so it can't be read as one line with a drop to a child straight below; on the
+   * wiki's grid each level of lines has a row of its own, and the middle reads better.
+   */
+  centreLoneParent?: boolean;
+  /**
+   * Keep every card on a grid of this many units. The wiki's tree templates are drawn on a grid
+   * of tiles, so the export asks for one; the picture doesn't need it.
+   */
+  snap?: number;
 }
 
 export interface Card {
@@ -177,6 +192,15 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
   const index = indexTree(tree);
   const W = options.cardWidth ?? CARD_WIDTH;
   const H = options.cardHeight ?? CARD_HEIGHT;
+  const spouseGap = options.spouseGap ?? SPOUSE_GAP;
+  const siblingGap = options.siblingGap ?? SIBLING_GAP;
+  const margin = options.margin ?? MARGIN;
+  const snap = options.snap;
+  // On a grid, positions are rounded onto it: down for where a row of children starts (so the row
+  // still fits its band), to the nearest line for a couple (then held inside the band).
+  const down = (value: number): number => (snap ? Math.floor(value / snap) * snap : value);
+  const near = (value: number): number => (snap ? Math.round(value / snap) * snap : value);
+  const up = (value: number): number => (snap ? Math.ceil(value / snap) * snap : value);
 
   const units = marriageUnits(tree);
   const unitOf = new Map<string, number>();
@@ -229,8 +253,8 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
         }
       }
     }
-    const unitWidth = members.length * W + (members.length - 1) * SPOUSE_GAP;
-    const below = node.children.reduce((sum, child) => sum + child.width, 0) + Math.max(0, node.children.length - 1) * SIBLING_GAP;
+    const unitWidth = members.length * W + (members.length - 1) * spouseGap;
+    const below = node.children.reduce((sum, child) => sum + child.width, 0) + Math.max(0, node.children.length - 1) * siblingGap;
     node.width = Math.max(unitWidth, below);
     return node;
   };
@@ -254,21 +278,21 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
   const cards = new Map<string, Card>();
   const anchorOf = new Map<Node, string>();
   const place = (node: Node, left: number): void => {
-    const below = node.children.reduce((sum, child) => sum + child.width, 0) + Math.max(0, node.children.length - 1) * SIBLING_GAP;
-    let cursor = left + (node.width - below) / 2;
+    const below = node.children.reduce((sum, child) => sum + child.width, 0) + Math.max(0, node.children.length - 1) * siblingGap;
+    let cursor = down(left + (node.width - below) / 2);
     for (const child of node.children) {
       place(child, cursor);
-      cursor += child.width + SIBLING_GAP;
+      cursor += child.width + siblingGap;
     }
-    const unitWidth = node.members.length * W + (node.members.length - 1) * SPOUSE_GAP;
-    let unitLeft = left + (node.width - unitWidth) / 2;
+    const unitWidth = node.members.length * W + (node.members.length - 1) * spouseGap;
+    let unitLeft = down(left + (node.width - unitWidth) / 2);
     if (node.children.length) {
       const centre = (child: Node): number => cards.get(anchorOf.get(child)!)!.x + W / 2;
       const middle = (centre(node.children[0]!) + centre(node.children.at(-1)!)) / 2;
-      unitLeft = Math.min(Math.max(middle - unitWidth / 2, left), left + node.width - unitWidth);
+      unitLeft = Math.min(Math.max(near(middle - unitWidth / 2), left), left + node.width - unitWidth);
     }
     node.members.forEach((id, i) => {
-      cards.set(id, { id, x: Math.round(unitLeft + i * (W + SPOUSE_GAP)), y: MARGIN + node.row * (H + ROW_GAP), width: W, height: H, row: node.row });
+      cards.set(id, { id, x: Math.round(unitLeft + i * (W + spouseGap)), y: margin + node.row * (H + ROW_GAP), width: W, height: H, row: node.row });
     });
   };
   // Each node's anchor is the member its parents' line comes down to.
@@ -278,11 +302,11 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
     node.children.forEach((child, i) => noteAnchors(child, kids[i]!));
   };
 
-  let cursor = MARGIN;
+  let cursor = margin;
   for (const root of roots) {
     noteAnchors(root, root.members[0]!);
     place(root, cursor);
-    cursor += root.width + SIBLING_GAP * 1.5;
+    cursor = up(cursor + root.width + siblingGap * 1.5);
   }
 
   const links: Link[] = [];
@@ -292,7 +316,7 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
   };
   const draw = (node: Node): void => {
     const position = new Map(node.members.map((id, i) => [id, i]));
-    const bottom = MARGIN + node.row * (H + ROW_GAP) + H;
+    const bottom = margin + node.row * (H + ROW_GAP) + H;
     let lane = 0;
     let bracket = 0;
     for (const group of node.groups) {
@@ -313,7 +337,7 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
       } else {
         // Off-centre, so it can't be mistaken for one line with a drop to a child straight below.
         const card = cards.get(group.parent!)!;
-        origin = [card.x + W / 4, bottom];
+        origin = [card.x + (options.centreLoneParent ? W / 2 : W / 4), bottom];
       }
       if (!group.kids.length && !group.cross.length) continue;
       const busY = bottom + 30 + 10 * Math.min(lane++, 4);
@@ -344,8 +368,8 @@ export function layoutTree(tree: Tree, options: LayoutOptions = {}): Layout {
   // Kept in the order of the people list, so a layout can be read alongside the tree.
   const ordered = tree.people.map((p) => cards.get(p.id)!).filter(Boolean);
   return {
-    width: Math.round(Math.max(...all.map((card) => card.x + card.width)) + MARGIN),
-    height: MARGIN * 2 + rows * H + (rows - 1) * ROW_GAP,
+    width: Math.round(Math.max(...all.map((card) => card.x + card.width)) + margin),
+    height: margin * 2 + rows * H + (rows - 1) * ROW_GAP,
     rows,
     cards: ordered,
     links: links.map((link) => ({ ...link, points: link.points.map(([x, y]) => [Math.round(x * 2) / 2, Math.round(y * 2) / 2] as Point) })),

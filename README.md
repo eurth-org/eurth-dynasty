@@ -12,7 +12,7 @@ The rules every Eurth tool follows are in the handbook, `node_modules/@eurth/sty
 - **Choose the law.** Absolute primogeniture, male-preference primogeniture, agnatic primogeniture, agnatic seniority, or an elective crown where you rank the candidates. Four house rules, a switch each, decide who is left out: those born outside marriage, those who renounced, those who married out, and adopted children.
 - **Read the line.** The line of succession is worked out again on every change. The heir is marked by a word and a ring, never by colour alone, and everyone left out is listed with the reason.
 - **Ask "what if".** Pick a person and an event (dies, abdicates, renounces, marries out) to see who would reign and how the line would move, and what the other laws would have said.
-- **Take it with you.** A small tree lives in its link. Any tree saves as the nation's profile file (`<nation>.eurth.json`), which is how it comes back for editing. There are also SVG, PNG and WebP pictures, wikitext for IIWiki, GEDCOM for genealogy programs, and the line of succession as text.
+- **Take it with you.** A small tree lives in its link. Any tree saves as the nation's profile file (`<nation>.eurth.json`), which is how it comes back for editing. There are also SVG, PNG and WebP pictures, GEDCOM for genealogy programs, the line of succession as text, and wikitext for IIWiki: the tree as a `{{Tree chart}}` or a `{{Family tree}}`, one person's ancestors as an `{{Ahnentafel}}`, or a plain table.
 
 Nothing is stored in the browser or on a server.
 

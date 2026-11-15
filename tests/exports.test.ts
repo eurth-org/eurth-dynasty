@@ -4,7 +4,7 @@ import { fromGedcom, fromGedcomDate, isGedcom, MAX_GEDCOM_LENGTH, toGedcom, toGe
 import { withPlainIds } from '../src/dynasty/link';
 import { cleanTree, type Tree } from '../src/dynasty/model';
 import { lineOfSuccession } from '../src/dynasty/succession';
-import { membersTable, successionList, toWikitext, wikiEscape } from '../src/dynasty/wikitext';
+import { ahnentafel, ahnentafelNumbers, ahnentafelSubject, chartGrid, membersTable, successionList, toWikitext, treeChart, wikiEscape, wikiFormats } from '../src/dynasty/wikitext';
 
 /** GEDCOM has a husband's place and a wife's, so partners can come back the other way round. */
 const settled = (tree: Tree): Tree => ({ ...tree, unions: tree.unions.map((u) => (u.a < u.b ? u : { ...u, a: u.b, b: u.a })) });
@@ -284,7 +284,7 @@ describe('wikitext', () => {
 
   it('puts it all together under headings', () => {
     const text = toWikitext(halvard());
-    expect(text.startsWith("== House of Halvard ==\n'''The House of Halvard''' reigns over Duchy of Skarn. The succession follows absolute primogeniture.\n\n=== Members ===\n{|")).toBe(true);
+    expect(text.startsWith("== House of Halvard ==\n'''The House of Halvard''' reigns over the Duchy of Skarn. The succession follows absolute primogeniture.\n\n=== Members ===\n{|")).toBe(true);
     expect(text).toContain('\n=== Line of succession ===\n');
     expect(text).toContain('\n=== Not in the line ===\n* Lord Bram: born outside marriage\n');
     expect(text.endsWith('\n')).toBe(true);
@@ -310,6 +310,195 @@ describe('wikitext', () => {
       const text = toWikitext(example.tree);
       expect(text, example.id).not.toMatch(/undefined|NaN/);
       expect(text.split('\n').filter((line) => line === '|-'), example.id).toHaveLength(example.tree.people.length);
+    }
+  });
+});
+
+describe('wikitext for the tree templates', () => {
+  const small = () =>
+    makeTree({
+      house: 'House of Small',
+      reigning: 'k',
+      people: [person('k', 'King', 'Hal', 'm', '1950'), person('q', 'Queen', 'Ann', 'f', '1952'), person('a', '', 'Ada', 'f', '1975', { union: 'u' }), person('b', '', 'Bo', 'm', '1978', { union: 'u' })],
+      unions: [union('u', 'k', 'q', '1974')],
+    });
+
+  it('writes a couple and their children the way the template’s own examples do', () => {
+    expect(treeChart(small())).toBe(
+      [
+        '{{Tree chart/start|summary=Family tree of the House of Small}}',
+        "{{Tree chart|P1 |v|P2 |P1='''Reigning'''<br>King Hal<br>b. 1950|P2=Queen Ann<br>b. 1952}}",
+        '{{Tree chart| |,|-|^|-|.}}',
+        "{{Tree chart|P3 | |P4 |P3='''Heir'''<br>Ada<br>b. 1975|boxstyle_P3=border-width: 3px;|P4='''2nd in line'''<br>Bo<br>b. 1978}}",
+        '{{Tree chart/end}}',
+      ].join('\n'),
+    );
+  });
+
+  it('writes the same rows under the Family tree template’s name', () => {
+    const chart = treeChart(small());
+    const family = treeChart(small(), 'Family tree');
+    expect(family).toBe(chart.replaceAll('{{Tree chart', '{{Family tree'));
+    expect(family.startsWith('{{Family tree/start|')).toBe(true);
+    expect(family.endsWith('{{Family tree/end}}')).toBe(true);
+  });
+
+  it('gives every person one box, three tiles wide, with nothing on top of another', () => {
+    for (const example of examples) {
+      const chart = chartGrid(example.tree);
+      const names = chart.rows.flat().filter((tile) => chart.boxes.has(tile));
+      expect(names.sort(), example.id).toEqual([...chart.boxes.keys()].sort());
+      expect(chart.boxes.size, example.id).toBe(example.tree.people.length);
+      for (const row of chart.rows) {
+        const width = row.reduce((sum, tile) => sum + (chart.boxes.has(tile) ? 3 : 1), 0);
+        expect(width, example.id).toBeLessThanOrEqual(chart.columns);
+        // A row holds boxes or the lines between generations; boxes in a row never touch.
+        row.forEach((tile, i) => {
+          if (chart.boxes.has(tile) && i > 0) expect(chart.boxes.has(row[i - 1]!), example.id).toBe(false);
+        });
+      }
+    }
+  });
+
+  it('joins every line to a box or to another line: no loose ends', () => {
+    const reach: Record<string, string> = { ',': 'SE', '.': 'SW', '`': 'NE', "'": 'NW', '^': 'NEW', v: 'SEW', ')': 'NSE', '(': 'NSW', '+': 'NSEW', '-': 'EW', '!': 'NS' };
+    const back: Record<string, string> = { N: 'S', S: 'N', E: 'W', W: 'E' };
+    const step: Record<string, [number, number]> = { N: [-1, 0], S: [1, 0], E: [0, 1], W: [0, -1] };
+    for (const example of examples) {
+      const chart = chartGrid(example.tree);
+      // Lay the rows out tile by tile, a box filling three.
+      const grid = chart.rows.map((row) => row.flatMap((tile) => (chart.boxes.has(tile) ? ['#', '#', '#'] : [tile])));
+      grid.forEach((row, r) => {
+        row.forEach((tile, c) => {
+          // A straight line may stop short (it is drawn through); corners and junctions may not.
+          if (tile === '#' || tile === ' ' || tile === '-' || tile === '!') return;
+          for (const side of reach[tile]!) {
+            const [dr, dc] = step[side]!;
+            const next = grid[r + dr]?.[c + dc];
+            const joined = next === '#' || (next !== undefined && next !== ' ' && reach[next]!.includes(back[side]!));
+            expect(joined, `${example.id} row ${r} tile ${c} "${tile}" going ${side} meets "${next}"`).toBe(true);
+          }
+        });
+      });
+    }
+  });
+
+  it('gives each level of lines its own row, so one family’s line can’t be read as another’s', () => {
+    // Duke Osric has a son by himself and five children by his marriage: two rows of lines.
+    const chart = chartGrid(halvard());
+    expect(chart.rows.map((row) => row.join('|'))).toEqual([
+      ' | | | | | | | | | | | |P1|v|P2',
+      " |,|-|-|-|-|-|-|-|-|-|-|-|'| |!",
+      ' |!| | | |,|-|-|-|-|-|-|-|v|-|^|-|-|-|-|-|v|-|-|-|-|-|-|-|.',
+      'P3| |P4|v|P5| |P7|v|P8| |P10|v|P11| |P13',
+      ' | | | | | | |!| | | | | | | |!| | | | | | | |!',
+      ' | | | | | |P6| | | | | |P9| | | | | |P12',
+    ]);
+    expect(chart.heir).toBe('P10');
+  });
+
+  it('says in each box what the card says, and lets nothing typed become markup', () => {
+    const tree = small();
+    tree.people[2]!.name = 'Ada {{evil}} | [[x]]';
+    tree.people[2]!.link = 'https://iiwiki.com/wiki/Ada';
+    const chart = chartGrid(cleanTree(tree));
+    expect(chart.boxes.get('P1')).toBe("'''Reigning'''<br>King Hal<br>b. 1950");
+    expect(chart.boxes.get('P3')).toBe("'''Heir'''<br>[https://iiwiki.com/wiki/Ada Ada &#123;&#123;evil&#125;&#125; &#124; &#91;&#91;x&#93;&#93;]<br>b. 1975");
+    const text = treeChart(cleanTree(tree));
+    expect(text).not.toContain('{{evil');
+    expect(text).not.toContain('[[x');
+  });
+
+  it('copes with nobody, with one person, and with a tangle', () => {
+    expect(treeChart(cleanTree({}))).toBe('{{Tree chart/start|summary=Family tree}}\n{{Tree chart/end}}');
+    expect(treeChart(makeTree({ house: '', reigning: 'a', people: [person('a', '', 'Una', 'f')] }))).toBe(
+      "{{Tree chart/start|summary=Family tree}}\n{{Tree chart|P1 |P1='''Reigning'''<br>Una}}\n{{Tree chart/end}}",
+    );
+    const loop = makeTree({ house: 'House of Loop', people: [person('a', '', 'Ouro', 'm', '', { parent: 'c' }), person('b', '', 'Boros', 'm', '', { parent: 'a' }), person('c', '', 'Cycle', 'f', '', { parent: 'b' })] });
+    expect(() => treeChart(loop)).not.toThrow();
+    expect(chartGrid(loop).boxes.size).toBe(3);
+  });
+});
+
+describe('wikitext for the Ahnentafel template', () => {
+  it('numbers ancestors: a father is twice the number, a mother one more', () => {
+    const numbers = ahnentafelNumbers(varenko(), 'maelin');
+    expect(Object.fromEntries([...numbers].map(([n, p]) => [n, p.id]))).toEqual({ 1: 'maelin', 2: 'emeric', 3: 'ilsa', 6: 'teomir2', 7: 'ressa', 12: 'teomir1', 13: 'halina' });
+  });
+
+  it('writes the template with the person in bold and dates after each name', () => {
+    expect(ahnentafel(varenko(), 'maelin')).toBe(
+      [
+        '{{Ahnentafel',
+        '|collapsed=no',
+        "|1=1. '''Maelin''' (born 2014)",
+        '|2=2. Lord Emeric (born 1984)',
+        '|3=3. Princess Ilsa (born 1986)',
+        '|6=6. King Teomir II (born 1958)',
+        '|7=7. Queen Ressa (born 1960)',
+        '|12=12. King Teomir I (1930–1988)',
+        '|13=13. Queen Halina (1933–2001)',
+        '}}',
+      ].join('\n'),
+    );
+  });
+
+  it('puts one known parent in the right place, and the first of two unknowns in the father’s', () => {
+    const tree = makeTree({
+      house: 'House of Test',
+      people: [person('me', '', 'Me', 'x', '', { parent: 'mum' }), person('mum', '', 'Mum', 'f', '', { union: 'u' }), person('gx', '', 'First', 'x'), person('gy', '', 'Second', 'x')],
+      unions: [union('u', 'gx', 'gy')],
+    });
+    expect(Object.fromEntries([...ahnentafelNumbers(tree, 'me')].map(([n, p]) => [n, p.id]))).toEqual({ 1: 'me', 3: 'mum', 6: 'gx', 7: 'gy' });
+  });
+
+  it('stops at five generations, and ends when someone is their own ancestor', () => {
+    const people = Array.from({ length: 9 }, (_, i) => person(`g${i}`, '', `Generation ${i}`, 'm', '', i < 8 ? { parent: `g${i + 1}` } : {}));
+    const deep = makeTree({ house: 'House of Deep', people });
+    expect([...ahnentafelNumbers(deep, 'g0').keys()]).toEqual([1, 2, 4, 8, 16]);
+    const loop = makeTree({ house: 'House of Loop', people: [person('a', '', 'Ouro', 'm', '', { parent: 'b' }), person('b', '', 'Boros', 'm', '', { parent: 'a' })] });
+    expect([...ahnentafelNumbers(loop, 'a').keys()]).toEqual([1, 2, 4, 8, 16]);
+    expect(ahnentafelNumbers(loop, 'nobody').size).toBe(0);
+  });
+
+  it('is of the reigning person unless someone else is asked for', () => {
+    expect(ahnentafelSubject(varenko())).toBe('teomir2');
+    expect(ahnentafelSubject(varenko(), 'aris')).toBe('aris');
+    expect(ahnentafelSubject(varenko(), 'ghost')).toBe('teomir2');
+    const nobody = varenko();
+    delete nobody.reigning;
+    expect(ahnentafelSubject(nobody)).toBe('teomir1');
+    expect(ahnentafelSubject(cleanTree({}))).toBeUndefined();
+  });
+});
+
+describe('wikitext, whichever shape is asked for', () => {
+  it('offers four shapes', () => {
+    expect(wikiFormats.map((format) => format.id)).toEqual(['tree-chart', 'family-tree', 'ahnentafel', 'table']);
+  });
+
+  it('puts the tree, then the line of succession, then who is left out', () => {
+    const chart = toWikitext(halvard(), { format: 'tree-chart' });
+    expect(chart).toContain('\n=== Family tree ===\n{{Tree chart/start|');
+    expect(chart).toContain('{{Tree chart/end}}\n\n=== Line of succession ===\n');
+    expect(chart).toContain('\n=== Not in the line ===\n* Lord Bram: born outside marriage\n');
+    expect(chart).not.toContain('{| class="wikitable');
+    expect(toWikitext(halvard(), { format: 'family-tree' })).toContain('\n=== Family tree ===\n{{Family tree/start|');
+    const ancestry = toWikitext(varenko(), { format: 'ahnentafel', subject: 'aris' });
+    expect(ancestry).toContain("\n=== Ancestry of Aris ===\n{{Ahnentafel\n|collapsed=no\n|1=1. '''Aris''' (born 2020)\n");
+    expect(ancestry).toContain('\n=== Line of succession ===\n');
+    expect(toWikitext(varenko(), { format: 'ahnentafel' })).toContain('=== Ancestry of King Teomir II ===');
+    expect(toWikitext(varenko(), { format: 'table' })).toBe(toWikitext(varenko()));
+    expect(toWikitext(cleanTree({}), { format: 'ahnentafel' })).not.toContain('Ahnentafel');
+  });
+
+  it('never leaves a template open, in any shape, for any example', () => {
+    for (const example of examples) {
+      for (const format of wikiFormats) {
+        const text = toWikitext(example.tree, { format: format.id });
+        expect((text.match(/\{\{/g) ?? []).length, `${example.id} ${format.id}`).toBe((text.match(/\}\}/g) ?? []).length);
+        expect(text, `${example.id} ${format.id}`).not.toMatch(/undefined|NaN/);
+      }
     }
   });
 });
