@@ -223,7 +223,8 @@
       return;
     }
     const count = result.tree.people.length;
-    await open(result.tree, result.warnings[0] ?? `${count} ${count === 1 ? 'person' : 'people'} read from the file. Now say who reigns.`);
+    const read = `${count} ${count === 1 ? 'person' : 'people'} read from the file.`;
+    await open(result.tree, result.warnings[0] ?? (result.tree.reigning === undefined ? `${read} Now say who reigns.` : read));
   }
 
   async function loaded(next: EurthProfile) {
@@ -316,7 +317,7 @@
       </div>
 
       <div class="eu-row">
-        <ProfileButtons profile={saved} onload={loaded} onerror={(errors) => toast(errors[0]?.message ?? 'That file isn’t a nation profile. Pick one that ends in .eurth.json.')} />
+        <ProfileButtons profile={saved} onload={loaded} onerror={(errors) => toast(`That file isn’t a nation profile we can read${errors[0]?.message ? ` (${errors[0].message.replace(/\.$/, '')})` : ''}. Pick one that ends in .eurth.json.`)} />
         <button type="button" class="eu-btn" data-click="bounce" onclick={() => download(toGedcom(tree), `${slug}.ged`, 'text/plain')}><Icon icon={faFileExport} /> Save GEDCOM</button>
         <button type="button" class="eu-btn" data-click="bounce" onclick={() => gedcomInput?.click()}><Icon icon={faFileImport} /> Load GEDCOM</button>
         <!-- Hidden: the button beside it opens the file picker. -->
