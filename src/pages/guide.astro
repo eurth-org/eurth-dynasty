@@ -1,0 +1,260 @@
+---
+// The guide: succession explained well, with worked examples the tests check, sources, and the
+// day it was last brought up to date. Search engines get the breadcrumb and the article's date.
+import { article, ref, wikipedia } from '@eurth/style/build';
+import Page from '@eurth/style/components/Page.astro';
+import { site } from '../../eurth.config.mjs';
+import Worked from '../components/Worked.astro';
+import { workedById } from '../content/worked';
+
+const updated = '2026-11-15';
+const headline = 'How royal succession works';
+const description = 'Five succession laws explained with worked family trees: primogeniture, the male line, seniority and election, plus regencies, pretenders and how real houses kept their records.';
+const out = (href: string) => ref(href, site.host);
+const wiki = (title: string) => wikipedia(title, site.host);
+---
+
+<Page site={site} title={headline} description={description} crumbs={[{ name: 'Guide', path: '/guide/' }]} jsonld={[article(site, { headline, path: '/guide/', description, updated })]}>
+  <article class="eu-prose guide">
+    <p class="eu-kicker">Guide</p>
+    <h1>{headline}</h1>
+    <p class="eu-lead">
+      A succession law is a rule for answering one question before anyone has to fight over it: when the ruler dies, who is next? Every law here answers it
+      differently, and every one has started a war somewhere. Pick the one whose quarrels suit your story.
+    </p>
+    <p>
+      Each law below comes with a worked example: a small invented family, and the line of succession that <a href="/">Dynasty</a> gives for it. Open any of them
+      in the tool and change it. The <a href="/glossary/">glossary</a> has the vocabulary and the <a href="/examples/">examples</a> have six complete houses.
+    </p>
+
+    <nav aria-label="In this guide">
+      <ul>
+        <li><a href="#basics">Three ideas every law shares</a></li>
+        <li><a href="#absolute">Absolute primogeniture</a></li>
+        <li><a href="#male-preference">Male-preference primogeniture</a></li>
+        <li><a href="#agnatic">Agnatic primogeniture</a></li>
+        <li><a href="#seniority">Agnatic seniority</a></li>
+        <li><a href="#elective">Elective monarchy</a></li>
+        <li><a href="#left-out">Who is left out</a></li>
+        <li><a href="#regencies">Regencies</a></li>
+        <li><a href="#pretenders">Claimants and pretenders</a></li>
+        <li><a href="#records">How real houses kept their records</a></li>
+        <li><a href="#sources">Sources</a></li>
+      </ul>
+    </nav>
+
+    <h2 id="basics">Three ideas every law shares</h2>
+    <p>
+      <strong>The line descends from someone.</strong> A line of succession is reckoned from a <a href="/glossary/#founder">founder</a>: the first of the house to
+      hold the crown, or whoever the law names. Only the founder's descendants have places. The queen's sister-in-law, however formidable, does not.
+    </p>
+    <p>
+      <strong>The dead are passed over, but their children are not.</strong> If the heir dies before the ruler, the heir's children stand where their parent
+      stood. This is <a href="/glossary/#representation">representation</a>, and it is why a grandchild can come before a living uncle. The alternative,
+      <a href="/glossary/#proximity-of-blood">proximity of blood</a>, prefers the nearer relative, and the two rules met on a good many medieval battlefields.
+    </p>
+    <Worked example={workedById('representation')} draw={false} />
+    <p>
+      <strong>A line runs down before it runs across.</strong> Under primogeniture, the eldest child's whole branch comes before the second child. The ruler's
+      great-grandchild by the eldest ranks above the ruler's own second child. Seniority, further down, is the one law here that works the other way.
+    </p>
+
+    <h2 id="absolute">Absolute primogeniture</h2>
+    <p>
+      The eldest child inherits, daughter or son. It is the simplest rule there is and, for monarchies, a recent one: Sweden adopted it in 1980, which made the
+      infant Princess Victoria heir ahead of her younger brother. The Netherlands, Norway, Belgium, Denmark and Luxembourg followed, and the United Kingdom did so
+      with the Succession to the Crown Act 2013, for those born after 28 October 2011.
+    </p>
+    <p>For a writer, its drama lies elsewhere: with nothing to argue about in the rule, the arguments move to legitimacy, marriages and renunciations.</p>
+    <Worked example={workedById('absolute')} />
+
+    <h2 id="male-preference">Male-preference primogeniture</h2>
+    <p>
+      Sons before daughters, but daughters before uncles. A woman inherits when she has no living brothers and no dead brother left heirs. This was the rule of
+      England and then Britain for centuries, and it is why Elizabeth II reigned: her father had two daughters and no sons. Spain still uses it (Article 57 of the
+      1978 constitution), and so does Monaco.
+    </p>
+    <p>
+      It produces a particular kind of household: an eldest daughter who is heir until the day a brother is born. In the vocabulary of succession she is an
+      <a href="/glossary/#heir-presumptive">heir presumptive</a>, never an heir apparent.
+    </p>
+    <Worked example={workedById('male-preference')} />
+
+    <h2 id="agnatic">Agnatic primogeniture</h2>
+    <p>
+      Men descended through men, and nobody else. A daughter cannot inherit, and neither can her sons: the claim cannot pass through her. It is often called
+      <a href="/glossary/#salic-law">Salic law</a>, after a Frankish code that French lawyers dusted off in the fourteenth century. In 1316 and again in 1328 the
+      French crown passed over a king's daughter and her line; in 1328 the passed-over claimant was Edward III of England, whose mother was a French princess. The
+      Hundred Years' War followed.
+    </p>
+    <p>
+      Japan's Imperial Household Law of 1947 keeps the rule today: the throne passes to male offspring in the male line. So did Hanover, which is why it parted
+      company with Britain in 1837, when Victoria took one throne and her uncle the other.
+    </p>
+    <Worked example={workedById('agnatic')} />
+    <p>
+      The classic crisis of an agnatic house is a ruler with daughters only. He can accept that a nephew or cousin will follow him, or he can try to change the
+      law. The Emperor Charles VI spent decades persuading Europe to accept his <a href={wiki('Pragmatic Sanction of 1713')}>Pragmatic Sanction of 1713</a>, so
+      that his daughter Maria Theresa could inherit the Habsburg lands. He died in 1740, and the War of the Austrian Succession began within the year.
+    </p>
+    <Worked example={workedById('only-daughters')} />
+
+    <h2 id="seniority">Agnatic seniority</h2>
+    <p>
+      Still the male line, but the crown moves sideways before it moves down: from a ruler to his brothers, eldest first, and to the next generation only when the
+      older one is used up. The sons of Yaroslav the Wise shared out Kievan Rus this way after 1054; the Ottoman throne went to the eldest living male of the
+      dynasty from 1617; and the Saudi throne has passed from brother to brother among the sons of Ibn Saud since 1953.
+    </p>
+    <p>
+      Its strength is that the ruler is always a grown man. Its weaknesses are short reigns by elderly brothers, and a crowd of cousins who each stand a few
+      funerals from the throne.
+    </p>
+    <Worked example={workedById('seniority')} />
+    <Worked example={workedById('brothers-first')} />
+
+    <h2 id="elective">Elective monarchy</h2>
+    <p>
+      Nobody inherits. When the ruler dies, a body of <a href="/glossary/#elector">electors</a> chooses the next one, usually for life. The Golden Bull of 1356
+      fixed seven prince-electors for the Holy Roman Empire. In Poland-Lithuania, from 1573, every nobleman could vote, and tens of thousands turned up in a field
+      outside Warsaw to do so. Malaysia's nine hereditary rulers still elect one of their number as head of state for five years at a time.
+    </p>
+    <p>
+      Election does not keep families out. The Habsburgs were elected emperor almost without a break from 1438 to 1740: an elective crown can be hereditary in
+      everything but law, so long as the electors are kept content. In Dynasty, an elective law makes the line whatever you say it is: you rank the candidates, and
+      blood promises nothing.
+    </p>
+    <Worked example={workedById('elective')} />
+
+    <h2 id="left-out">Who is left out</h2>
+    <p>The law gives the order. The house rules decide who is in the queue at all. Dynasty has a switch for each, because real houses disagreed about every one.</p>
+    <h3>Born outside marriage</h3>
+    <p>
+      Most hereditary systems gave a child born outside marriage no claim. Most, not all: William the Conqueror was known in his lifetime as William the Bastard,
+      and inherited Normandy in 1035 all the same. A child could also be <a href="/glossary/#legitimation">legitimised</a> later. John of Gaunt's Beaufort children
+      were, in 1397, and a clause added in 1407 barred them from the throne anyway. The Tudor claim ran through them regardless.
+    </p>
+    <h3>Renunciation and abdication</h3>
+    <p>
+      A <a href="/glossary/#renunciation">renunciation</a> gives up a place in the line, for oneself or for one's descendants too. Philip V of Spain renounced the
+      French throne for himself and his line as the price of keeping the Spanish one, in the settlement that ended the War of the Spanish Succession. An
+      <a href="/glossary/#abdication">abdication</a> is different: a reigning monarch steps down, the heir succeeds as if the monarch had died, and the monarch's
+      children keep their places. Edward VIII abdicated in 1936; Queen Beatrix of the Netherlands in 2013, in favour of her son.
+    </p>
+    <h3>Marrying out</h3>
+    <p>
+      Many houses demanded that their members marry equals, or marry with permission. Archduke Franz Ferdinand married Countess Sophie Chotek in 1900 only after
+      swearing that their children would never succeed: a <a href="/glossary/#morganatic-marriage">morganatic marriage</a>. In the Netherlands, a member of the
+      royal house who marries without parliament's consent loses their place, as Prince Friso did in 2004. In Dynasty, a marriage “out” costs the person their
+      place and the children of that marriage theirs; children of an earlier, recognised marriage are untouched.
+    </p>
+    <h3>Adoption</h3>
+    <p>
+      European houses almost never let an adopted child inherit a throne. Rome did little else for a century: Nerva adopted Trajan, who adopted Hadrian, who adopted
+      Antoninus Pius, who adopted Marcus Aurelius. Dynasty leaves adopted children out unless you switch that rule off.
+    </p>
+    <Worked example={workedById('exclusions')} />
+    <Worked example={workedById('illegitimacy-off')} draw={false} />
+    <Worked example={workedById('renounce-self')} draw={false} />
+    <Worked example={workedById('adoption-on')} draw={false} />
+
+    <h2 id="regencies">Regencies</h2>
+    <p>
+      Primogeniture has a price: sooner or later it crowns a child. Louis XIV became king at four, Louis XV at five. A <a href="/glossary/#regency">regency</a> is
+      the answer: the child reigns, and a <a href="/glossary/#regent">regent</a> governs until the child comes of age. The same is done for a monarch who is ill or
+      abroad, as when the future George IV ruled as Prince Regent from 1811 during his father's last illness.
+    </p>
+    <p>
+      Who the regent is matters as much as who the heir is. The usual candidates are the monarch's mother (Anne of Austria for Louis XIV), the nearest adult in the
+      line (the rule of Britain's Regency Act 1937) or a council. Each has an interest of their own, and the nearest adult in the line is, by definition, the
+      person who gains most if the child does not grow up. Storytellers have noticed.
+    </p>
+    <p>
+      Dynasty does not appoint regents, but it tells you when you need one: give people birth years, and a reigning child is plain to see. Record the regent in the
+      child's notes.
+    </p>
+
+    <h2 id="pretenders">Claimants and pretenders</h2>
+    <p>
+      A <a href="/glossary/#claimant">claimant</a> says the throne should be theirs. A <a href="/glossary/#pretender">pretender</a> is a claimant to a throne that
+      someone else holds, or that no longer exists; the word comes from the French for “claimant” and makes no comment on the claim. They arise in three ways.
+    </p>
+    <ul>
+      <li>
+        <strong>Two laws, one throne.</strong> When Ferdinand VII of Spain set aside the Salic rule in 1830 so that his daughter Isabella could succeed, his brother
+        Carlos claimed the crown under the old law. Their followers, the Carlists, fought three wars over it.
+      </li>
+      <li>
+        <strong>A ruler removed.</strong> James II was driven from Britain in 1688. His son and grandson, the Old and Young Pretenders, kept the Jacobite claim
+        alive for two generations.
+      </li>
+      <li>
+        <strong>A throne abolished.</strong> Republican France has had three royal and imperial lines waiting at once: the Legitimists, the Orléanists and the
+        Bonapartists, each with its own law of succession.
+      </li>
+    </ul>
+    <p>
+      To build a pretender in Dynasty, draw the family once and ask it two questions. Switch the law, or change who the line descends from, and compare the heirs:
+      wherever the answers differ, you have a rival court. What if does this for you when a ruler dies, naming who would reign under each other law.
+    </p>
+
+    <h2 id="records">How real houses kept their records</h2>
+    <p>
+      A claim is only as good as the record of it, so ruling families were early and careful genealogists. Medieval houses kept pedigree rolls, long parchments
+      with the founder at the top. In England, from 1530 to 1688, the heralds toured the counties on
+      <a href={wiki('Heraldic visitation')}>visitations</a>, recording who was entitled to arms and from whom they descended; the
+      <a href={out('https://www.college-of-arms.gov.uk/')}>College of Arms</a> still holds the books.
+    </p>
+    <p>
+      From 1763 to 1944 the <a href={wiki('Almanach de Gotha')}>Almanach de Gotha</a> listed Europe's reigning and formerly reigning houses every year, and being
+      in the right section of it settled arguments about who could marry whom. Burke's Peerage has done the same for British titled families since 1826. Many
+      German houses wrote their own <a href="/glossary/#house-law">house laws</a>, and Japan's Imperial Household keeps the Kōtōfu, the register of the imperial
+      line.
+    </p>
+    <p>
+      Genealogists gave us two tools worth borrowing. The <a href="/glossary/#ahnentafel">ahnentafel</a>, first printed in 1590, numbers a person's ancestors so
+      that any ancestor's father is twice their number. And <a href="/glossary/#gedcom">GEDCOM</a>, since 1984, is the plain-text file that lets one family tree
+      program read another's work; Dynasty reads and writes it.
+    </p>
+
+    <h2>Try it</h2>
+    <p>
+      Open the <a href="/">tree</a>, or start from one of the <a href="/examples/">examples</a>. When your house has an heir, a spare and a grievance, give it a
+      country: <a href="https://eurth.org">Eurth</a> has a world for it to live in.
+    </p>
+
+    <h2 id="sources">Sources</h2>
+    <ul>
+      <li><a href={wiki('Order of succession')}>Order of succession</a>, <a href={wiki('Primogeniture')}>Primogeniture</a> and <a href={wiki('Salic law')}>Salic law</a>, Wikipedia.</li>
+      <li><a href={wiki('Agnatic seniority')}>Agnatic seniority</a> and <a href={wiki('Elective monarchy')}>Elective monarchy</a>, Wikipedia.</li>
+      <li><a href={wiki('Morganatic marriage')}>Morganatic marriage</a>, <a href={wiki('Regent')}>Regent</a> and <a href={wiki('Pretender')}>Pretender</a>, Wikipedia.</li>
+      <li><a href={out('https://www.legislation.gov.uk/ukpga/2013/20/contents')}>Succession to the Crown Act 2013</a>, legislation.gov.uk: the United Kingdom's move to absolute primogeniture.</li>
+      <li><a href={out('https://www.legislation.gov.uk/ukpga/Edw8and1Geo6/1/16/contents')}>Regency Act 1937</a>, legislation.gov.uk: who is regent, and when.</li>
+      <li><a href={out('https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229')}>Constitución Española</a>, Boletín Oficial del Estado: Article 57 sets out male-preference primogeniture.</li>
+      <li><a href={out('https://www.kunaicho.go.jp/e-kunaicho/hourei-01.html')}>The Imperial House Law</a>, Imperial Household Agency of Japan, in English.</li>
+      <li><a href={out('https://avalon.law.yale.edu/medieval/golden.asp')}>The Golden Bull of the Emperor Charles IV, 1356</a>, the Avalon Project, Yale Law School.</li>
+      <li><a href={wiki('Almanach de Gotha')}>Almanach de Gotha</a>, <a href={wiki('Heraldic visitation')}>Heraldic visitation</a> and <a href={wiki('Ahnentafel')}>Ahnentafel</a>, Wikipedia.</li>
+      <li><a href={out('https://gedcom.io/specs/')}>The GEDCOM specifications</a>, FamilySearch.</li>
+    </ul>
+    <p class="eu-muted">Last updated <time datetime={updated}>15 November 2026</time>.</p>
+  </article>
+</Page>
+
+<style>
+  /* Headings that a link jumps to stay clear of the top of the window. */
+  .guide :is(h2, h3) {
+    scroll-margin-top: var(--space-8);
+  }
+
+  /* The contents list: each link is a line of its own, so each is tall enough to press. */
+  .guide nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .guide nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-target);
+  }
+</style>

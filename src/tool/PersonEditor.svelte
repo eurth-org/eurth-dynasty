@@ -400,6 +400,7 @@
 
   /* A name inside a sentence that selects that person: a link in looks, a button in fact. */
   .link {
+    min-width: var(--size-target);
     min-height: var(--size-target);
     padding: 0;
     border: 0;

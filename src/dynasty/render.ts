@@ -97,6 +97,8 @@ export interface CardText {
   place?: number;
   /** The name with its title, on one or two lines. */
   name: string[];
+  /** The name with its title in full, for when the card had to cut it short. */
+  full: string;
   /** "b. 1958", "1930–1988", or nothing. */
   dates: string;
   /** Everything above in one sentence, for screen readers. */
@@ -133,6 +135,7 @@ export function cardText(tree: Tree, succession: Succession, person: Person): Ca
     heir,
     ...(place === undefined ? {} : { place }),
     name: wrapName(full),
+    full,
     dates,
     label: [full, tag.replace('–', ' to '), spoken].filter(Boolean).join(', '),
   };

@@ -1,0 +1,69 @@
+---
+// One of the guide's worked examples: what it shows, the tree, and the line the tool gives.
+// The data is src/content/worked.ts, which the tests run the engine over, so the page can't
+// claim a line the tool wouldn't produce.
+import type { Worked } from '../content/worked';
+import { withThe } from '../dynasty/describe';
+import { encodeTree, LINK_PARAM } from '../dynasty/link';
+import TreeFigure from './TreeFigure.astro';
+
+interface Props {
+  example: Worked;
+  /** Leave the drawing out, for a variation on a tree already shown. */
+  draw?: boolean;
+}
+
+const { example, draw = true } = Astro.props;
+const href = `/?${LINK_PARAM}=${encodeTree(example.tree)}`;
+---
+
+<section class="eu-card eu-card--outline worked" aria-labelledby={`worked-${example.id}`}>
+  <h3 id={`worked-${example.id}`}><span class="eu-kicker">Worked example</span> {example.title}</h3>
+  <p>{example.text}</p>
+  {
+    draw && (
+      <TreeFigure tree={example.tree} id={`tree-${example.id}`} label={`Family tree of ${withThe(example.tree.house)}: ${example.title}`}>
+        {example.tree.house}, {example.tree.realm}. The heir is ringed; a dashed line leads to a child who was adopted or born outside marriage.
+      </TreeFigure>
+    )
+  }
+  <p class="eu-label">The line of succession</p>
+  <ol>
+    {example.line.map((name) => <li>{name}</li>)}
+  </ol>
+  {
+    example.leftOut && (
+      <>
+        <p class="eu-label">Left out</p>
+        <ul>
+          {Object.entries(example.leftOut).map(([name, why]) => (
+            <li>
+              {name}: {why}
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+  <p><a href={href}>Open this tree in Dynasty</a></p>
+</section>
+
+<style>
+  .worked {
+    max-width: none;
+    margin: var(--space-6) 0;
+  }
+
+  h3 {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font: var(--type-heading);
+  }
+
+  ol,
+  ul,
+  p {
+    margin: 0;
+  }
+</style>

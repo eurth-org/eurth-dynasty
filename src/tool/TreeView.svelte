@@ -143,6 +143,10 @@
       role="group"
       aria-label="{label}. Arrow keys move between people; Enter picks one to edit."
     >
+      <defs>
+        <!-- Keeps an unusually wide name inside its card. Every card is the same size. -->
+        <clipPath id="dy-card-clip"><rect width={layout.cards[0]?.width ?? 0} height={layout.cards[0]?.height ?? 0} /></clipPath>
+      </defs>
       <g class="links" aria-hidden="true">
         {#each layout.links as link, i (i)}
           <path d={linkPath(link.points)} class:dashed={link.dashed} />
@@ -158,7 +162,7 @@
             data-person={card.id}
             role="button"
             tabindex={tabStop === card.id ? 0 : -1}
-            aria-label={text.label}
+            aria-description={text.name.join(' ').endsWith('…') ? text.full : undefined}
             aria-pressed={selected === card.id}
             onclick={() => {
               current = card.id;
@@ -172,20 +176,16 @@
               <rect class="ring" x={card.x - 5} y={card.y - 5} width={card.width + 10} height={card.height + 10} rx="16" />
             {/if}
             <rect class="box" x={card.x} y={card.y} width={card.width} height={card.height} rx="12" />
-            <svg x={card.x} y={card.y} width={card.width} height={card.height} aria-hidden="true">
+            <!-- The words on the card are its name for screen readers too, so what is seen and
+                 what is spoken can't differ. The spaces between them are read as pauses. -->
+            <g transform="translate({card.x} {card.y})" clip-path="url(#dy-card-clip)">
               {#if text.reigning}
-                <path class="crown" class:away={arriving === card.id} transform="translate(12 9)" d={CROWN_PATH} />
+                <path class="crown" class:away={arriving === card.id} transform="translate(12 9)" d={CROWN_PATH} aria-hidden="true" />
               {/if}
-              {#if text.tag}
-                <text class="tag" x={text.reigning ? 34 : 12} y="20">{text.tag}</text>
-              {/if}
-              {#each text.name as line, i (i)}
-                <text class="name" x="12" y={42 + i * 18}>{line}</text>
-              {/each}
-              {#if text.dates}
-                <text class="dates" x="12" y={card.height - 11}>{text.dates}</text>
-              {/if}
-            </svg>
+              {#if text.tag}<text class="tag" x={text.reigning ? 34 : 12} y="20">{text.tag}</text>{' '}{/if}
+              {#each text.name as line, i (i)}<text class="name" x="12" y={42 + i * 18}>{line}</text>{' '}{/each}
+              {#if text.dates}<text class="dates" x="12" y={card.height - 11}>{text.dates}</text>{/if}
+            </g>
           </g>
         {/if}
       {/each}
@@ -210,8 +210,11 @@
     cursor: grabbing;
   }
 
+  /* The stylesheet keeps pictures inside their column. This one is meant to be wider than its
+     box and scroll, or the cards would shrink too small to press. */
   .tree {
     display: block;
+    max-width: none;
   }
 
   .empty {

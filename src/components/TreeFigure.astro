@@ -42,8 +42,10 @@ const svg = treeSvg(tree, { classes: true, idPrefix: id, heading });
     background: var(--surface);
   }
 
+  /* Wider than its box on purpose: it scrolls, so the names stay large enough to read. */
   .tree-scroll > svg {
     display: block;
+    max-width: none;
   }
 
   /* The drawing's colours: one class for each token it uses. */

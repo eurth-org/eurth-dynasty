@@ -8,19 +8,15 @@ Three parts: what comes next, what each release added (newest first), and what's
 
 **15 November 2026.** Phase 1 is done: the engine in `src/dynasty/`, the worked examples and glossary in `src/content/`, all tested. Phase 2 is under way, from the starter template of @eurth/style 1.0.0.
 
-Done in Phase 2 so far:
-
-- The starter's configuration, renamed for Dynasty: `eurth.config.mjs`, `astro.config.mjs`, `wrangler.jsonc`, `LAUNCH_AT` (15 December), the three workflows, `tests/shell.test.js`, placeholder icons in `public/`.
-- `src/dynasty/edit.ts`: every change the tool can make to a tree, tested.
-- The drawing can carry class names instead of colours, for trees inside pages (`src/components/TreeFigure.astro`).
-- The tool: `src/tool/Maker.svelte` with `TreeView.svelte`, `PersonEditor.svelte` and `palette.ts`.
-- Pages: the tree (start page), examples, glossary and 404. The site builds, and the suite's checks pass on it.
+Done in Phase 2 so far: the whole site. The tree tool, the examples, the guide with its worked examples, the glossary and the 404 page; icons and the sharing image; README. `npm run check`, `npm run build`, `npm test` (247 tests, the suite's checks included) and `npm run axe` (five pages, both themes, no findings) all pass. The tool has been tried in a browser: selecting, editing, switching law, What if, undo and the arrow keys.
 
 Next, in order:
 
-1. `src/pages/guide.astro`: the prose, with the worked examples from `src/content/worked.ts`.
-2. `npm run axe`, and try every part of the tool in a browser (`npm run preview`). Astro needs Node 22.23 or later; on this machine that is `/opt/homebrew/bin/node` (26).
-3. `npm run images` for the icons and the sharing image; README; `docs/feedback-log.md`.
+1. Try the rest in a browser: the downloads (SVG, PNG, WebP), the profile file out and back, GEDCOM out and back, the crown's flight, a phone-width window.
+2. See that CI is green on GitHub, Lighthouse included.
+3. Then the work is waiting on the two points below, and on the door: the launch workflow runs on 14 December at 22:30 UTC.
+
+Astro needs Node 22.23 or later; on this machine that is `/opt/homebrew/bin/node` (26), so put `/opt/homebrew/bin` first on the PATH.
 
 Waiting on others:
 

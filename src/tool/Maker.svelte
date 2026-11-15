@@ -319,7 +319,8 @@
         <ProfileButtons profile={saved} onload={loaded} onerror={(errors) => toast(errors[0]?.message ?? 'That file isn’t a nation profile. Pick one that ends in .eurth.json.')} />
         <button type="button" class="eu-btn" data-click="bounce" onclick={() => download(toGedcom(tree), `${slug}.ged`, 'text/plain')}><Icon icon={faFileExport} /> Save GEDCOM</button>
         <button type="button" class="eu-btn" data-click="bounce" onclick={() => gedcomInput?.click()}><Icon icon={faFileImport} /> Load GEDCOM</button>
-        <input bind:this={gedcomInput} class="eu-visually-hidden" type="file" accept=".ged,.gedcom,text/plain" tabindex="-1" aria-label="A GEDCOM file to load" onchange={(e) => loadGedcom(e.currentTarget)} />
+        <!-- Hidden: the button beside it opens the file picker. -->
+        <input bind:this={gedcomInput} hidden type="file" accept=".ged,.gedcom,text/plain" onchange={(e) => loadGedcom(e.currentTarget)} />
         <button type="button" class="eu-btn" data-click="pop" onclick={copyWikitext}><Icon icon={faCopy} /> Copy wikitext</button>
       </div>
       <p class="eu-help">
@@ -657,6 +658,7 @@
 
   /* A name that selects that person: a link in looks, a button in fact. */
   .link {
+    min-width: var(--size-target);
     min-height: var(--size-target);
     padding: 0;
     border: 0;
